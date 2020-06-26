@@ -1,7 +1,7 @@
 #[derive(Clone)]
 pub struct BitSet {
-    data: Vec<u8>,
-    len: usize,
+    pub data: Vec<u8>,
+    pub len: usize,
 }
 
 impl BitSet {

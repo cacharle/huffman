@@ -1,3 +1,4 @@
+use std::fmt;
 use std::collections::{BinaryHeap, HashMap};
 
 use super::bits::BitSet;
@@ -52,7 +53,7 @@ impl Tree {
         heap.pop().unwrap()
     }
 
-    pub fn to_bit_map(&self) -> HashMap<u8, BitSet> {
+    pub fn to_hash_map(&self) -> HashMap<u8, BitSet> {
         match &self.content {
             Content::Leaf(b) => {
                 let mut hm = HashMap::with_capacity(1);
@@ -60,11 +61,11 @@ impl Tree {
                 hm
             },
             Content::Parent { left, right } => {
-                let mut left_hm = left.to_bit_map();
+                let mut left_hm = left.to_hash_map();
                 for (_, bits) in left_hm.iter_mut() {
                     bits.push_front_bit(0);
                 }
-                let mut right_hm = right.to_bit_map();
+                let mut right_hm = right.to_hash_map();
                 for (_, bits) in right_hm.iter_mut() {
                     bits.push_front_bit(1);
                 }
@@ -74,31 +75,29 @@ impl Tree {
         }
     }
 
-    pub fn put(&self) {
-        self.put_with_level(0);
+    fn fmt_spaces(f: &mut fmt::Formatter, level: usize) -> fmt::Result {
+        for _ in 0..level {
+            write!(f, "  ")?;
+        }
+        Ok(())
     }
 
-    fn put_with_level(&self, level: usize) {
+    fn fmt_with_level(&self, f: &mut fmt::Formatter, level: usize) -> fmt::Result {
         match &self.content {
             Content::Leaf(b) => {
-                print!("{} {}\n", self.occurences, b);
+                write!(f, "{} {}\n", self.occurences, b)?;
             },
             Content::Parent { left, right } => {
-                print!("NODE {}\n", self.occurences);
-                Tree::put_spaces(level);
-                print!("left: ");
-                left.put_with_level(level + 1);
-                Tree::put_spaces(level);
-                print!("right: ");
-                right.put_with_level(level + 1);
+                write!(f, "NODE {}\n", self.occurences)?;
+                Tree::fmt_spaces(f, level)?;
+                write!(f, "left: ")?;
+                left.fmt_with_level(f, level + 1)?;
+                Tree::fmt_spaces(f, level)?;
+                write!(f, "right: ")?;
+                right.fmt_with_level(f, level + 1)?;
             },
         }
-    }
-
-    fn put_spaces(n: usize) {
-        for _ in 0..(n * 2) {
-            print!(" ");
-        }
+        Ok(())
     }
 }
 
@@ -122,5 +121,11 @@ impl Eq for Node {}
 impl PartialEq for Node {
     fn eq(&self, other: &Self) -> bool {
         self.occurences == other.occurences
+    }
+}
+
+impl fmt::Debug for Tree {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.fmt_with_level(f, 0)
     }
 }

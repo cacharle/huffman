@@ -1,30 +1,40 @@
 use std::env;
-use std::fs;
+// use std::fs;
+use std::io;
 use std::io::Read;
+use std::io::Write;
 
 pub mod tree;
 pub mod bits;
+pub mod conversion;
 
 use tree::Tree;
-use bits::BitSet;
 
 fn main() {
-    let file_path = env::args().nth(1).unwrap();
+    if let Some(s) = env::args().nth(1) {
+        if s != "d" {
+            return
+        }
+        // let data: Vec<u8> = io::stdin().bytes().map(|x| x.unwrap()).collect();
+        // deserialize
 
-    let f = fs::File::open(file_path).unwrap();
-    let data: Vec<u8> = f.bytes().map(|x| x.unwrap()).collect();
+    } else {
+        // let f = fs::File::open(file_path).unwrap();
 
-    let tree = Tree::from_data(&data);
-    tree.put();
+        let data: Vec<u8> = io::stdin().bytes().map(|x| x.unwrap()).collect();
 
-    let bitmap = tree.to_bit_map();
-    for (k, v) in bitmap.iter() {
-        println!("{:4} {:?}", format!("{:?}", *k as char), v);
+        let tree = Tree::from_data(&data);
+        // print!("{:?}", tree);
+
+        let table = conversion::Table::from_tree(&tree);
+        // print!("{:?}", table);
+
+        let converted_data = table.convert(data);
+        // println!("{:?}", converted_data);
+
+        let header = table.serialize();
+
+        io::stdout().write_all(&header).unwrap();
+        io::stdout().write_all(&converted_data).unwrap();
     }
-
-    let mut bitset = BitSet::new();
-    for byte in data {
-        bitset.concat(&bitmap[&byte]);
-    }
-    println!("{:?}", bitset);
 }
