@@ -6,6 +6,10 @@ use super::tree::Tree;
 pub struct Table(pub HashMap<u8, BitSet>);
 
 impl Table {
+    pub fn new() -> Table {
+        Table(HashMap::new())
+    }
+
     pub fn from_tree(tree: &Tree) -> Table {
         Table(tree.to_hash_map())
     }

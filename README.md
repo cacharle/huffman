@@ -21,3 +21,7 @@ Conversion table where each entry's format is:
     1 byte for the actual byte value
     1 byte for size of representation in bits
     the representation aligned on a 8-bit boundary
+
+## Tests
+
+`cargo test`
